@@ -1,0 +1,90 @@
+<script type="text/javascript">
+  function getContextVariableNames(callback) {
+    var names = []
+
+    function crawl(obj) {
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          if (typeof obj[key] === 'object') {
+            crawl(obj[key])
+          } else if (key === 'name') {
+            names.push(obj[key])
+          }
+        }
+      }
+    }
+
+    $.get('/context/global', function (data) {
+      crawl(JSON.parse(data.memory['hexa-ai:variables'].msg))
+      callback(names)
+    })
+  }
+
+  RED.nodes.registerType('read-variable', {
+    category: 'Hexa AI',
+    color: '#db8923',
+    defaults: {
+      variable_name: { value: "", required: true }
+    },
+    inputs: 0,
+    outputs: 1,
+    icon: "font-awesome/fa-upload",
+    label: function () {
+      return "read " + this.variable_name || "read variable"
+    },
+    paletteLabel: "read variable",
+    oneditprepare: function () {
+      let names = []
+      getContextVariableNames(function (data) {
+        names = data
+      })
+
+      $("#node-input-variable_name").autoComplete({
+        search: function (val) {
+          var matches = []
+          names.forEach(v => {
+            var i = v.toLowerCase().indexOf(val.toLowerCase())
+            if (i > -1) {
+              matches.push({ value: v, label: v, i: i })
+            }
+          })
+          matches.sort(function (A, B) { return A.i - B.i })
+          return matches
+        }
+      })
+    }
+  })
+</script>
+
+<script type="text/html" data-template-name="read-variable">
+  <div class="form-row">
+    <label for="node-input-variable_name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-variable_name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/html" data-help-name="read-variable">
+  <p>A node for receiving values from write variable. The first value is sent at the initialization of the node, and the next ones on each write in real time.</p>
+
+  <h3>Fields</h3>
+
+  <ul>
+    <li><strong>Name</strong> : The name of the variable to listen for updates. You can use wildcard <code>*</code> to match multiple variables, for example : <code>floor1.*</code>.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <ol class="node-ports">
+    <li>Value updated
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">string | numeric | boolean</span></dt>
+        <dd>The value of the variable that triggered the alarm.</dd>
+
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>The name of the variable.</dd>
+
+        <dt>origin <span class="property-type">object</span></dt>
+        <dd>The object containing all the informations about the variable.</dd>
+      </dl>
+    </li>
+  </ol>
+</script>

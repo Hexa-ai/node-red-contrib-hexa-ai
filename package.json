@@ -1,0 +1,16 @@
+{
+    "name": "node-red-contrib-hexa-ai",
+    "version": "0.0.1",
+    "node-red": {
+        "nodes": {
+            "warp10": "configurations/warp10.js",
+            "read-variable": "variables/read-variable.js",
+            "on-alarm": "variables/on-alarm.js",
+            "write-variable": "variables/write-variable.js",
+            "history-warp10": "variables/history/warp10.js"
+        }
+    },
+    "dependencies": {
+        "eventemitter2": "^6.4.9"
+    }
+}

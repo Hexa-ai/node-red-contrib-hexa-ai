@@ -1,0 +1,61 @@
+<script type="text/javascript">
+  RED.nodes.registerType('on-alarm', {
+    category: 'Hexa AI',
+    color: '#db8923',
+    defaults: {
+      variable_name: { value: "", required: true }
+    },
+    inputs: 0,
+    outputs: 2,
+    icon: "font-awesome/fa-bell",
+    label: function () {
+      return "alarm " + this.variable_name || "on alarm"
+    },
+    paletteLabel: "on alarm"
+  })
+</script>
+
+<script type="text/html" data-template-name="on-alarm">
+  <div class="form-row">
+      <label for="node-input-variable_name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-variable_name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/html" data-help-name="on-alarm">
+  <p>A node for receiving alarms triggered by write variable.</p>
+
+  <h3>Fields</h3>
+
+  <ul>
+    <li><strong>Name</strong> : The name of the variable to listen for alarms. You can use wildcard <code>*</code> to match multiple variables, for example : <code>floor1.*</code>.</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <ol class="node-ports">
+    <li>Alarm triggered
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">string | numeric | boolean</span></dt>
+        <dd>The value of the variable that triggered the alarm.</dd>
+
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>The name of the variable.</dd>
+
+        <dt>origin <span class="property-type">object</span></dt>
+        <dd>The object containing all the informations about the variable.</dd>
+      </dl>
+    </li>
+    <li>Alarm ended
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">string | numeric | boolean</span></dt>
+        <dd>The value of the variable that triggered the alarm.</dd>
+
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>The name of the variable.</dd>
+
+        <dt>origin <span class="property-type">object</span></dt>
+        <dd>The object containing all the informations about the variable.</dd>
+      </dl>
+    </li>
+  </ol>
+</script>

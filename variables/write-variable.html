@@ -1,0 +1,233 @@
+<script type="text/javascript">
+  function getContextVariableNames(callback) {
+    var names = []
+
+    function crawl(obj) {
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          if (typeof obj[key] === 'object') {
+            crawl(obj[key])
+          } else if (key === 'name') {
+            names.push(obj[key])
+          }
+        }
+      }
+    }
+
+    $.get('/context/global', function (data) {
+      crawl(JSON.parse(data.memory['hexa-ai:variables'].msg))
+      callback(names)
+    })
+  }
+
+  RED.nodes.registerType('write-variable', {
+    category: 'Hexa AI',
+    color: '#db8923',
+    defaults: {
+      variable_name: { value: "" },
+      variable_type: { value: "real" },
+      variable_unit: { value: "" },
+      history: { value: "disabled" },
+      history_hysteresis: { value: "" },
+      alarm: { value: "disabled" },
+      alarm_numeric_lower: { value: "" },
+      alarm_numeric_upper: { value: "" },
+      alarm_string_trigger: { value: "" },
+      alarm_boolean_trigger: { value: false },
+      alarm_trigger_message: { value: "" },
+      alarm_end_message: { value: "" },
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "font-awesome/fa-download",
+    label: function () {
+      return this.variable_name !== "" ? "write " + this.variable_name : "write variable"
+    },
+    paletteLabel: "write variable",
+    oneditprepare: function () {
+      let names = []
+      getContextVariableNames(function (data) {
+        names = data
+      })
+
+      $("#node-input-variable_name").autoComplete({
+        search: function (val) {
+          var matches = []
+          names.forEach(v => {
+            var i = v.toLowerCase().indexOf(val.toLowerCase())
+            if (i > -1) {
+              matches.push({ value: v, label: v, i: i })
+            }
+          })
+          matches.sort(function (A, B) { return A.i - B.i })
+          return matches
+        }
+      })
+
+      $("#node-input-variable_type").typedInput({
+        types: [
+          {
+            value: "variable_type",
+            options: [
+              { value: "real", label: "Real" },
+              { value: "integer", label: "Integer" },
+              { value: "string", label: "String" },
+              { value: "boolean", label: "Boolean" },
+            ]
+          }
+        ]
+      })
+      $("#node-input-variable_type").on('change', function () {
+        if ($(this).val() === "real" || $(this).val() === "integer") {
+          $(".numeric").show()
+          $(".string").hide()
+          $(".boolean").hide()
+        } else if ($(this).val() === "string") {
+          $(".numeric").hide()
+          $(".string").show()
+          $(".boolean").hide()
+        } else if ($(this).val() === "boolean") {
+          $(".numeric").hide()
+          $(".string").hide()
+          $(".boolean").show()
+        }
+      })
+
+      $("#node-input-history").typedInput({
+        types: [
+          {
+            value: "history",
+            options: [
+              { value: "disabled", label: "Disabled" },
+              { value: "enabled", label: "Enabled" },
+            ]
+          }
+        ]
+      })
+      $("#node-input-history").on('change', function () {
+        if ($(this).val() == "enabled") {
+          $(".history").show()
+        } else {
+          $(".history").hide()
+        }
+      })
+
+      $("#node-input-alarm").typedInput({
+        types: [
+          {
+            value: "alarm",
+            options: [
+              { value: "disabled", label: "Disabled" },
+              { value: "enabled", label: "Enabled" },
+            ]
+          }
+        ]
+      })
+
+      $("#node-input-alarm").on('change', function () {
+        if ($(this).val() == "enabled") {
+          $(".alarm").show()
+        } else {
+          $(".alarm").hide()
+        }
+      })
+
+      $("#node-input-history_hysteresis").typedInput({
+        type: "num",
+      })
+
+      $("#node-input-alarm_boolean_trigger").typedInput({
+        type: "bool",
+      })
+    }
+  })
+</script>
+
+<script type="text/html" data-template-name="write-variable">
+  <div class="form-row">
+      <label for="node-input-variable_name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-variable_name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-variable_type"><i class="fa fa-code"></i> Type</label>
+    <input type="text" id="node-input-variable_type">
+  </div>
+  <div class="form-row">
+    <label for="node-input-variable_unit"><i class="fa fa-pencil"></i> Unit</label>
+    <input type="text" id="node-input-variable_unit" placeholder="°C">
+  </div>
+  <div class="form-row">
+    <label for="node-input-history"><i class="fa fa-bar-chart"></i> History</label>
+    <input type="text" id="node-input-history">
+  </div>
+  <div class="history" style="margin-left: 5px; padding-left: 12px; border-left: 5px solid #efefef;">
+    <div class="form-row">
+      <label for="node-input-history_hysteresis"><i class="fa fa-sliders"></i> Hystérésis</label>
+      <input type="text" id="node-input-history_hysteresis" placeholder="0.1">
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-alarm"><i class="fa fa-bell"></i> Alarm</label>
+    <input type="text" id="node-input-alarm">
+  </div>
+  <div class="alarm" style="margin-left: 5px; padding-left: 12px; border-left: 5px solid #efefef;">
+    <div class="numeric">
+      <div class="form-row">
+        <label for="node-input-alarm_numeric_lower"><i class="fa fa-thermometer-empty"></i> Lower than</label>
+        <input type="text" id="node-input-alarm_numeric_lower" placeholder="10">
+      </div>
+      <div class="form-row">
+        <label for="node-input-alarm_numeric_upper"><i class="fa fa-thermometer-full"></i> Upper than</label>
+        <input type="text" id="node-input-alarm_numeric_upper" placeholder="90">
+      </div>
+    </div>
+    <div class="string">
+      <div class="form-row">
+        <label for="node-input-alarm_string_trigger"><i class="fa fa-search"></i> Value is</label>
+        <input type="text" id="node-input-alarm_string_trigger">
+      </div>
+    </div>
+    <div class="boolean">
+      <div class="form-row">
+        <label for="node-input-alarm_boolean_trigger"><i class="fa fa-search"></i> Value is</label>
+        <input type="text" id="node-input-alarm_boolean_trigger">
+      </div>
+    </div>
+    <div class="form-row">
+      <label for="node-input-alarm_trigger_message"><i class="fa fa-comment"></i> Trigger message</label>
+      <input type="text" id="node-input-alarm_trigger_message" placeholder="Alarm triggered for ${node.variable_name} at ${node.timestamp}">
+    </div>
+    <div class="form-row">
+      <label for="node-input-alarm_end_message"><i class="fa fa-comment"></i> End message</label>
+      <input type="text" id="node-input-alarm_end_message" placeholder="Alarm ended for ${node.variable_name} at ${node.timestamp}">
+    </div>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="write-variable">
+  <p>A node for storing typed variables. Each variable can be logged in graphs and can be monitored with an alert.</p>
+
+  <h3>Fields</h3>
+
+  <ul>
+    <li><strong>Name</strong> : The name of the variable. Use the dot notation for grouping variables. Ex : <code>foor1.vent.rpm</code>, <code>foor2.fridge.temp</code>. This value can be set by the <code>topic</code> input.</li>
+    <li><strong>Type</strong> : The type of the value you will send to this node.</li>
+    <li><strong>Unit</strong> : The unit of the value that will be used for the display. Ex : <code>°C</code>, <code>kWh</code>, <code>RPM</code>.</li>
+    <li><strong>History</strong> : Enable the history mode allowing to push values into timeseries and show them into charts.</li>
+    <li><strong>Hystérésis</strong> : The minimal variation between last and new value in order to update the history value.</li>
+    <li><strong>Alarm</strong> : Trigger an alarm event that you can use for a dashboard message, or actions like sms, email ...</li>
+    <li><strong>Lower than</strong> : If the value is lower than this field, The alarm will be triggered. Keep empty for no minimum value.</li>
+    <li><strong>Greater than</strong> : If the value is greater than this field, The alarm will be triggered. Keep empty for no minimum value.</li>
+    <li><strong>Value is</strong> : If the value matches the field, trigger the alarm.</li>
+  </ul>
+
+  <h3>Inputs</h3>
+
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">string | numeric | boolean</span></dt>
+    <dd>The value to write into the variable</dd>
+
+    <dt class="optional">topic <span class="property-type">string</span></dt>
+    <dd>The name of the variable to write into.</dd>
+  </dl>
+</script>
