@@ -58,7 +58,11 @@ module.exports = function (RED) {
           entry.meta.last_history_value = msg.payload
 
           // Push entry to the history buffer
-          bus.emit('history-buffer:push', { ...entry, meta: {} })
+          bus.emit('history-buffer:push', {
+            ...entry,
+            alarm: false,
+            meta: {}
+          })
         }
       }
 
@@ -95,6 +99,7 @@ module.exports = function (RED) {
           // Push the entry to the history buffer
           bus.emit('history-buffer:push', {
             ...entry,
+            alarm: true,
             name: (msg.topic || config.variable_name) + '.alarm',
             value: entry.meta.is_alarm_triggered,
             meta: {}
