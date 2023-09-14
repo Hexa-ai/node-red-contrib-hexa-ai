@@ -1,11 +1,33 @@
 {
-    "name": "node-red-contrib-hexa-ai",
-    "version": "0.0.1",
-    "description": "A set of nodes for working with variables. It includes nodes for reading, writing and monitoring variables.",
+    "name": "@hexa-ai/node-red-contrib-hexa-ai",
+    "version": "0.1.0",
+    "description": "A set of nodes for working with variables (reading, writing, history, alarm).",
     "keywords": [
-        "node-red"
+        "node-red",
+        "warp10",
+        "hexa-ai",
+        "variables",
+        "history",
+        "alarm"
     ],
     "licence": "MIT",
+    "author": "Hexa-AI",
+    "contributors": [
+        {
+            "name": "Anaël Favre",
+            "email": "anael.favre@gmail.com",
+            "url": "https://sauce-code.fr/"
+        }
+    ],
+    "homepage": "https://github.com/Hexa-ai/node-red-contrib-hexa-ai#readme",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Hexa-ai/node-red-contrib-hexa-ai"
+    },
+    "bugs": {
+        "url": "https://github.com/Hexa-ai/node-red-contrib-hexa-ai/issues",
+        "email": "contact@hexa-ai.fr"
+    },
     "node-red": {
         "nodes": {
             "warp10": "configurations/warp10.js",
