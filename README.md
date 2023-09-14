@@ -1,5 +1,9 @@
 # node-red-contrib-hexa-ai
 
+[![platform](https://img.shields.io/badge/platform-Node--RED-red)](https://nodered.org)
+![NPM version](https://badge.fury.io/js/@hexa-ai%2Fnode-red-contrib-hexa-ai.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 This package provides a set of nodes in Node-RED to manage variables data, history (using [warp10](https://www.warp10.io/)) and alarms.
 
 ## Pre-requisites
