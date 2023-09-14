@@ -1,6 +1,6 @@
 {
     "name": "@hexa-ai/node-red-contrib-hexa-ai",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "A set of nodes for working with variables (reading, writing, history, alarm).",
     "keywords": [
         "node-red",
