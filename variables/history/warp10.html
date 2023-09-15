@@ -4,7 +4,7 @@
     color: '#db8923',
     defaults: {
       target: { value: "", type: "warp10" },
-      interval_ms: { value: 1000 }
+      interval: { value: 1 }
     },
     inputs: 0,
     outputs: 0,
@@ -12,7 +12,7 @@
     label: 'history warp10',
     paletteLabel: "history warp10",
     oneditprepare: function () {
-      $("#node-input-interval_ms").typedInput({
+      $("#node-input-interval").typedInput({
         type: "num",
       })
     }
@@ -25,8 +25,8 @@
     <input type="text" id="node-input-target">
   </div>
   <div class="form-row">
-    <label for="node-input-interval_ms"><i class="fa fa-tag"></i> Interval</label>
-    <input type="text" id="node-input-interval_ms" placeholder="1000">
+    <label for="node-input-interval"><i class="fa fa-tag"></i> Interval (seconds)</label>
+    <input type="text" id="node-input-interval" placeholder="1">
   </div>
 </script>
 
@@ -35,6 +35,6 @@
 
   <ul>
     <li><strong>Target</strong> : The Warp10 configuration to be used.</li>
-    <li><strong>Interval</strong> : The interval in ms used for flushing the buffer.</li>
+    <li><strong>Interval</strong> : The interval in seconds used for flushing the buffer.</li>
   </ul>
 </script>

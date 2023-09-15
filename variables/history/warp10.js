@@ -103,7 +103,7 @@ module.exports = function (RED) {
 
         node.status({ fill: "grey", shape: "dot", text: "Buffer size : " + bufferSize })
       }
-    }, config.interval_ms || 1000)
+    }, (config.interval * 1000) || 1000)
 
     // Watch events
     bus.on('history-buffer:push', pushed)
