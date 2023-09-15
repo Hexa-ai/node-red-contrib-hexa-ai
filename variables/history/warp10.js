@@ -59,7 +59,7 @@ module.exports = function (RED) {
     let bufferSize = 0
 
     node.status({ fill: "grey", shape: "dot", text: "Buffer size : " + bufferSize })
-    
+
     // When we need to push a new value to the buffer
     const pushed = function (entry) {
       // Prepare the entry into the buffer if not exists
@@ -88,14 +88,17 @@ module.exports = function (RED) {
 
         // Build the script to execute
         let bufferScript = script
-        .replace('__WRITE_TOKEN__', target.token)
-        .replace('__PAYLOAD__', JSON.stringify(buffer))
-
-        console.log(bufferScript)
+          .replace('__WRITE_TOKEN__', target.token)
+          .replace('__PAYLOAD__', JSON.stringify(buffer))
 
         // Push the buffer to the endpoint
-        const response = await axios.post(target.endpoint + '/exec', bufferScript)
-        console.log(response.data)
+        try {
+          await axios.post(target.endpoint + '/exec', bufferScript)
+        } catch (error) {
+          let message = ''
+          try { message = error.response.data.message } catch { }
+          node.error("Could not flush buffer into warp10 endpoint : " + (message ? message : error.message))
+        }
 
         // Empty the buffer
         buffer = {}
