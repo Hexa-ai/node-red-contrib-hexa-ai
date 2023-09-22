@@ -27,7 +27,8 @@ module.exports = function (RED) {
 
     this.on('input', function (msg, send, done) {
       // Check if the variable name is set in the node configuration or in the msg.topic property
-      if (!(msg.topic || config.variable_name)) {
+      const name = config.variable_name ? config.variable_name : msg.topic
+      if (!name) {
         node.warn('Variable name is required. You should set it in the node configuration or in the msg.topic property')
         return
       }
@@ -38,7 +39,7 @@ module.exports = function (RED) {
       // Build the variable entry to be stored in the global context
       const entry = {
         ...defaultEntry,
-        name: msg.topic || config.variable_name,
+        name,
         value: msg.payload,
         ts: msg.ts || Date.now(),
       }
@@ -47,8 +48,10 @@ module.exports = function (RED) {
        * History
        */
       if (config.history === "enabled" && ['real', 'integer'].includes(config.variable_type)) {
+
         // Get the last value of the variable and check if the new value should be stored instead the old one
-        entry.meta.last_history_value = node.context().global.get('hexa-ai:variables.' + (msg.topic || config.variable_name) + '.meta.last_history_value') || null
+        entry.meta.last_history_value = node.context().global.get('hexa-ai:variables.' + name + '.meta.last_history_value') || null
+
         const valueChanged = entry.meta.last_history_value !== msg.payload
         const hysteresisValid = config.history_hysteresis !== "" ? Math.abs(entry.meta.last_history_value - msg.payload) >= config.history_hysteresis : true
 
@@ -90,7 +93,7 @@ module.exports = function (RED) {
         }
 
         // Check if the alarm has been triggered before
-        entry.meta.is_alarm_triggered = node.context().global.get('hexa-ai:variables.' + (msg.topic || config.variable_name) + '.meta.is_alarm_triggered') || false
+        entry.meta.is_alarm_triggered = node.context().global.get('hexa-ai:variables.' + name + '.meta.is_alarm_triggered') || false
 
         // If the alarm has been triggered before and the new value is not the same
         if (entry.meta.is_alarm_triggered !== trigger) {
@@ -100,7 +103,7 @@ module.exports = function (RED) {
           bus.emit('history-buffer:push', {
             ...entry,
             alarm: true,
-            name: (msg.topic || config.variable_name) + '.alarm',
+            name: name + '.alarm',
             value: entry.meta.is_alarm_triggered,
             meta: {}
           })
@@ -115,10 +118,10 @@ module.exports = function (RED) {
       }
 
       // Write the variable entry to the global context
-      node.context().global.set('hexa-ai:variables.' + (msg.topic || config.variable_name), entry)
+      node.context().global.set('hexa-ai:variables.' + name, entry)
 
       // Send the update event for read variable
-      bus.emit('variable-updated:' + (msg.topic || config.variable_name), entry)
+      bus.emit('variable-updated:' + name, entry)
 
       if (done) done()
     })
@@ -133,6 +136,6 @@ const sanitizeInputPayload = (value, config) => {
   } else if (config.variable_type === 'boolean') {
     value = !!value
   }
-
+  
   return value
 }
