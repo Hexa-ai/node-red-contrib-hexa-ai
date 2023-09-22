@@ -15,7 +15,8 @@
     }
 
     $.get('/context/global', function (data) {
-      crawl(JSON.parse(data.memory['hexa-ai:variables'].msg))
+      if(data.memory && Object.keys(data.memory).length) crawl(JSON.parse(data.memory['hexa-ai:variables'].msg))
+      if(data.default && Object.keys(data.default).length) crawl(JSON.parse(data.default['hexa-ai:variables'].msg))
       callback(names)
     })
   }
