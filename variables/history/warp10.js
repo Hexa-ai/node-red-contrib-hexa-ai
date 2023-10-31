@@ -91,18 +91,20 @@ module.exports = function (RED) {
           .replace('__WRITE_TOKEN__', target.token)
           .replace('__PAYLOAD__', JSON.stringify(buffer))
 
+        // Empty the buffer
+        buffer = {}
+        bufferSize = 0
+
         // Push the buffer to the endpoint
         try {
+          console.log('Pushing warp10 script to ' + target.endpoint + '/exec')
+          console.log(bufferScript)
           await axios.post(target.endpoint + '/exec', bufferScript)
         } catch (error) {
           let message = ''
           try { message = error.response.data.message } catch { }
           node.error("Could not flush buffer into warp10 endpoint : " + (message ? message : error.message))
         }
-
-        // Empty the buffer
-        buffer = {}
-        bufferSize = 0
 
         node.status({ fill: "grey", shape: "dot", text: "Buffer size : " + bufferSize })
       }
